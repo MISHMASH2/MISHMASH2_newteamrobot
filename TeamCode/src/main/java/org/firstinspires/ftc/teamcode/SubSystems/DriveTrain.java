@@ -49,7 +49,14 @@ public class DriveTrain {
         double y = Math.abs(gamepad.left_stick_y) > 0.1 ? -gamepad.left_stick_y : 0;
         double x = Math.abs(gamepad.left_stick_x) > 0.1 ? gamepad.left_stick_x : 0;
         double rx = Math.abs(gamepad.right_stick_x) > 0.1 ? gamepad.right_stick_x : 0;
-        drive(x, y, rx);
+
+        // החזקת R2 מפעילה נהיגה איטית; שחרור מחזיר לנהיגה רגילה.
+        // כיול הדק: 0.1 הוא סף הלחיצה להפעלת המצב, מתוך טווח 0 עד 1.
+        if (gamepad.right_trigger > 0.1) {
+            sdrive(x, y, rx);
+        } else {
+            drive(x, y, rx);
+        }
     }
 
     public void stop() {
@@ -66,7 +73,7 @@ public class DriveTrain {
         double big = Math.max(1.0, Math.max(Math.max(Math.abs(FLPower), Math.abs(BLPower)),Math.max(Math.abs(BRPower), Math.abs(FRPower))));
         // כיול נהיגה איטית: חלוקה ב־10 מגבילה ל־10% מהעוצמה המנורמלת.
         // שנו את המחלק בכל ארבע השורות יחד; מחלק גדול יותר נותן נסיעה איטית יותר.
-        // המתודה sdrive אינה מחוברת כרגע לכפתור ב־MainTeleOp.
+        // מופעלת בהחזקת R2 דרך drive(Gamepad), שאליה קורא MainTeleOp.
         FL.setPower(FLPower/big/10);
         FR.setPower(FRPower/big/10);
         BR.setPower(BRPower/big/10);
