@@ -18,10 +18,10 @@ public class DriveTrain {
 
         // כיול כיוונים: בדקו תחילה כשהגלגלים באוויר שפקודת קדימה מסובבת את כולם לנסיעה קדימה.
         // התאימו FORWARD / REVERSE לכל מנוע לפי ההרכבה הפיזית.
-        FL.setDirection(DcMotor.Direction.REVERSE);
-        BL.setDirection(DcMotor.Direction.REVERSE);
-        FR.setDirection(DcMotor.Direction.FORWARD);
-        BR.setDirection(DcMotor.Direction.FORWARD);
+        FR.setDirection(DcMotor.Direction.REVERSE);
+        BR.setDirection(DcMotor.Direction.REVERSE);
+        FL.setDirection(DcMotor.Direction.FORWARD);
+        BL.setDirection(DcMotor.Direction.FORWARD);
 
         stop();
         FL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -45,17 +45,17 @@ public class DriveTrain {
     public void drive(Gamepad gamepad) {
         // כיול ג׳ויסטיקים: 0.1 הוא סף התעלמות מתזוזות קטנות סביב המרכז (טווח הציר: ‎-1 עד 1).
         // אם יש תנועה בלי נגיעה בסטיק הגדילו מעט את הסף; אם תחילת התנועה אינה רגישה מספיק הקטינו.
-        // אפשר לכייל כל ציר בנפרד בשלוש השורות הבאות.
-        double y = Math.abs(gamepad.left_stick_y) > 0.1 ? -gamepad.left_stick_y : 0;
-        double x = Math.abs(gamepad.left_stick_x) > 0.1 ? gamepad.left_stick_x : 0;
-        double rx = Math.abs(gamepad.right_stick_x) > 0.1 ? gamepad.right_stick_x : 0;
+        // הסטיק השמאלי שולט בקדימה, אחורה וסיבוב. הסטיק הימני שולט בנסיעה הצידה.
+        double forward = Math.abs(gamepad.left_stick_y) > 0.1 ? -gamepad.left_stick_y : 0;
+        double turn = Math.abs(gamepad.left_stick_x) > 0.1 ? gamepad.left_stick_x : 0;
+        double strafe = Math.abs(gamepad.right_stick_x) > 0.1 ? gamepad.right_stick_x : 0;
 
         // החזקת R2 מפעילה נהיגה איטית; שחרור מחזיר לנהיגה רגילה.
         // כיול הדק: 0.1 הוא סף הלחיצה להפעלת המצב, מתוך טווח 0 עד 1.
         if (gamepad.right_trigger > 0.1) {
-            sdrive(x, y, rx);
+            sdrive(strafe, forward, turn);
         } else {
-            drive(x, y, rx);
+            drive(strafe, forward, turn);
         }
     }
 
@@ -71,13 +71,13 @@ public class DriveTrain {
         double BLPower=y-x+rx;
         double BRPower=y+x-rx;
         double big = Math.max(1.0, Math.max(Math.max(Math.abs(FLPower), Math.abs(BLPower)),Math.max(Math.abs(BRPower), Math.abs(FRPower))));
-        // כיול נהיגה איטית: חלוקה ב־10 מגבילה ל־10% מהעוצמה המנורמלת.
+        // בנהיגה איטית כל מנוע מקבל שליש מהעוצמה המנורמלת.
         // שנו את המחלק בכל ארבע השורות יחד; מחלק גדול יותר נותן נסיעה איטית יותר.
         // מופעלת בהחזקת R2 דרך drive(Gamepad), שאליה קורא MainTeleOp.
-        FL.setPower(FLPower/big/10);
-        FR.setPower(FRPower/big/10);
-        BR.setPower(BRPower/big/10);
-        BL.setPower(BLPower/big/10);
+        FL.setPower(FLPower/big/3);
+        FR.setPower(FRPower/big/3);
+        BR.setPower(BRPower/big/3);
+        BL.setPower(BLPower/big/3);
     }
 
 
